@@ -1,0 +1,74 @@
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Formulario Sensor JSON</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 30px; background-color: #f4f4f4; }
+    form { background: white; padding: 20px; border-radius: 8px; max-width: 400px; margin: auto; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+    h2 { text-align: center; color: #333; }
+    label { font-weight: bold; display: block; margin-top: 10px; }
+    input, button { width: 100%; padding: 8px; margin-top: 5px; border: 1px solid #ccc; border-radius: 4px; }
+    #response { margin-top: 20px; text-align: center; }
+  </style>
+</head>
+<body>
+  <form id="sensorForm">
+    <h2>Formulario Sensor</h2>
+
+    <label for="sensor_id">ID Sensor:</label>
+    <input type="text" id="sensor_id" value="mi_sensor_postman_">
+
+    <label for="temperature">Temperatura:</label>
+    <input type="text" id="temperature" value="25,5">
+
+    <label for="vibration">Vibración:</label>
+    <input type="text" id="vibration" value="0,123">
+
+    <label for="status">Estado:</label>
+    <input type="text" id="status" value="NORMAL">
+
+    <button type="submit">Enviar</button>
+    <div id="response"></div>
+  </form>
+
+  <script>
+    document.getElementById('sensorForm').addEventListener('submit', async function (e) {
+      e.preventDefault();
+
+      const temperature = parseFloat(document.getElementById('temperature').value.replace(',', '.'));
+      const vibration = parseFloat(document.getElementById('vibration').value.replace(',', '.'));
+
+      const data = {
+        sensor_id: document.getElementById('sensor_id').value,
+        temperature: temperature,
+        vibration: vibration,
+        status: document.getElementById('status').value
+      };
+
+      document.getElementById("response").innerText = "Enviando datos...";
+
+      try {
+        const res = await fetch("https://data-processor-v27b.onrender.com/api/data", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify(data)
+        });
+
+        if (!res.ok) {
+          const error = await res.json();
+          throw new Error(error.error || "Error desconocido");
+        }
+
+        const result = await res.json();
+        document.getElementById("response").innerText = "Enviado correctamente: " + JSON.stringify(result);
+      } catch (err) {
+        document.getElementById("response").innerText = "Error: " + err.message;
+      }
+    });
+  </script>
+</body>
+</html>
